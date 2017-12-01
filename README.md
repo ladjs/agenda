@@ -45,10 +45,6 @@ const Agenda = require('@ladjs/agenda');
 const mongoose = require('@ladjs/mongoose');
 const Graceful = require('@ladjs/graceful');
 
-const jobs = require('./jobs');
-const { logger } = require('./helpers');
-const config = require('./config');
-
 const agenda = new Agenda();
 agenda.configure({
   logger: console,

@@ -80,7 +80,9 @@ Agenda.prototype.start = function() {
       });
 
       // Start jobs needed to run now
-      this.config.agendaBootJobs.forEach(this.now);
+      this.config.agendaBootJobs.forEach(job => {
+        this.now(job);
+      });
 
       this._start();
     });

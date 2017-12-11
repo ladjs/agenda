@@ -106,7 +106,7 @@ Agenda.prototype.start = function() {
 
   this.on('fail', (err, job) => {
     err.message = `job "${job.attrs.name}" failed: ${err.message}`;
-    this.config.logger.error(err, { extra: { job } });
+    this.config.logger.error(err, { job });
   });
 
   this.on('error', this.config.logger.error);

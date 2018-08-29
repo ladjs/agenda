@@ -1,38 +1,35 @@
-const memwatch = require('memwatch-next');
 const Agenda = require('agenda');
 const stopAgenda = require('stop-agenda');
 
 Agenda.prototype.configure = function(config) {
-  this.config = Object.assign(
-    {
-      logger: console,
-      // these are options passed directly to `stop-agenda`
-      // <https://github.com/ladjs/stop-agenda>
-      stopAgenda: {
-        cancelQuery: {
-          repeatInterval: {
-            $exists: true,
-            $ne: null
-          }
+  this.config = {
+    logger: console,
+    // these are options passed directly to `stop-agenda`
+    // <https://github.com/ladjs/stop-agenda>
+    stopAgenda: {
+      cancelQuery: {
+        repeatInterval: {
+          $exists: true,
+          $ne: null
         }
-      },
-      // these are jobs defined via `config.jobs`
-      // e.g. `agendaJobDefinitions: [ [name, agendaOptions, fn], ... ]`
-      agendaJobDefinitions: [],
-      // these get automatically invoked to `agenda.every`
-      // e.g. `agenda.every('5 minutes', 'locales')`
-      // and you define them as [ interval, job name ]
-      // you need to define them here for graceful handling
-      // e.g. `agendaRecurringJobs: [ ['5 minutes', 'locales' ], ... ]`
-      agendaRecurringJobs: [],
-      // these get automatically invoked when process starts
-      // e.g. `agenda.now('locales');`
-      // and you define them as Strings in the array
-      // e.g. `config.now: ['locales','ping','pong','beep', ... ]`
-      agendaBootJobs: []
+      }
     },
-    config
-  );
+    // these are jobs defined via `config.jobs`
+    // e.g. `agendaJobDefinitions: [ [name, agendaOptions, fn], ... ]`
+    agendaJobDefinitions: [],
+    // these get automatically invoked to `agenda.every`
+    // e.g. `agenda.every('5 minutes', 'locales')`
+    // and you define them as [ interval, job name ]
+    // you need to define them here for graceful handling
+    // e.g. `agendaRecurringJobs: [ ['5 minutes', 'locales' ], ... ]`
+    agendaRecurringJobs: [],
+    // these get automatically invoked when process starts
+    // e.g. `agenda.now('locales');`
+    // and you define them as Strings in the array
+    // e.g. `config.now: ['locales','ping','pong','beep', ... ]`
+    agendaBootJobs: [],
+    ...config
+  };
 };
 
 Agenda.prototype._start = Agenda.prototype.start;
@@ -52,18 +49,18 @@ Agenda.prototype.start = function() {
     // note that the core reason we have this is because
     // during development we may remove recurring jobs
     // and define new ones, therefore we don't want the old ones to run
-    this.cancel(this.config.stopAgenda.cancelQuery, (err, numRemoved) => {
+    this.cancel(this.config.stopAgenda.cancelQuery, async (err, numRemoved) => {
       // if there was an error then log it and stop agenda
       if (err) {
         this.config.logger.error(err);
-        stopAgenda(this, this.config.stopAgenda)
-          .then()
-          .catch(err => {
-            if (err) return this.config.logger.error(err);
-            this.config.logger.debug(
-              'stopped agenda due to issue with agenda cancel'
-            );
-          });
+        try {
+          await stopAgenda(this, this.config.stopAgenda);
+          this.config.logger.debug(
+            'stopped agenda due to issue with agenda cancel'
+          );
+        } catch (err) {
+          this.config.logger.error(err);
+        }
         return;
       }
 
@@ -95,9 +92,9 @@ Agenda.prototype.start = function() {
 
   this.on('complete', job => {
     this.config.logger.debug(`job "${job.attrs.name}" completed`);
-    // Manually handle garbage collection
+    // NOTE: You may want to manually handle garbage collection here
     // <https://github.com/rschmukler/agenda/issues/129#issuecomment-108057837>
-    memwatch.gc();
+    // memwatch.gc();
   });
 
   this.on('success', job => {

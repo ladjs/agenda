@@ -9,6 +9,8 @@
 
 > Agenda for Lad
 
+Agenda is:
+>  A light-weight job scheduling library for Node.js 
 
 ## Table of Contents
 
@@ -35,7 +37,7 @@ yarn add @ladjs/agenda
 
 ## Usage
 
-This package serves as a drop-in replacement for a normal Agenda `require()` call. It carries the same exact API and returns the same Agenda instance that it normally would (except it adds some extra glue on top, such as built-in integration of [stop-agenda][]).
+This package serves as a drop-in replacement for a normal [Agenda](https://www.npmjs.com/package/agenda) `require()` call. It carries the same exact API and returns the same Agenda instance that it normally would (except it adds some extra glue on top, such as built-in integration of [stop-agenda][]).
 
 > Default options are shown below:
 
